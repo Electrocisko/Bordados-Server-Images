@@ -52,7 +52,7 @@ export const createProduct = async (req, res) => {
         throw new Error("Archivo adjunto no valido.");
       }
 
-      const processImage = await sharp(picture.buffer).resize(200, 200).toBuffer();// cambia el tamaño a 200 x 200 px
+      const processImage = await sharp(picture.buffer).resize(400, 400).toBuffer();// cambia el tamaño a 200 x 200 px
       const pathImage = `src/public/images/${originalName}`;
       newProduct.image = originalName;
       fs.writeFileSync(pathImage, processImage);
@@ -125,7 +125,7 @@ export const modifiedProductById = async (req, res) => {
         fs.unlinkSync(`src/public/images/${oldData.image}`);
       }
 
-      const processImage = await sharp(picture.buffer).resize(200, 200).toBuffer();// cambia el tamaño a 200 x 200 px
+      const processImage = await sharp(picture.buffer).resize(400, 400).toBuffer();// cambia el tamaño a 200 x 200 px
       const pathImage = `src/public/images/${originalName}`;
       fs.writeFileSync(pathImage, processImage);
       data.image = originalName;
