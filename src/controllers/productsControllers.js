@@ -131,7 +131,7 @@ export const modifiedProductById = async (req, res) => {
       fs.writeFileSync(pathImage, processImage);
       data.image = originalName;
     }
-    data.iat = dayjs().subtract(30,'day').format(); 
+ 
 
     //Modifica imagen si es que hay
     let modifiedProduct = await Product.findByIdAndUpdate(id, data);
