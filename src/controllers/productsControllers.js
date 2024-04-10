@@ -109,9 +109,8 @@ export const modifiedProductById = async (req, res) => {
     const id = req.params.id;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new Error("Id  no valido");
     let data = req.body;
+     //Modifica imagen si es que hay
     if (req.file) {
-    
-
       const picture = req.file;
       const originalName = req.file.originalname;
       const imageSplit = originalName.split(".");
@@ -130,10 +129,11 @@ export const modifiedProductById = async (req, res) => {
       const pathImage = `src/public/images/${originalName}`;
       fs.writeFileSync(pathImage, processImage);
       data.image = originalName;
-    }
+    } 
  
+    data.iat = dayjs().format();
 
-    //Modifica imagen si es que hay
+   
     let modifiedProduct = await Product.findByIdAndUpdate(id, data);
   
     res.status(200).json({
