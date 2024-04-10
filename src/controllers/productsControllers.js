@@ -131,7 +131,7 @@ export const modifiedProductById = async (req, res) => {
       data.image = originalName;
     } 
  
-    data.iat = dayjs().format();
+    // data.iat = dayjs().format(); No se modifica fecha al actualizars
 
    
     let modifiedProduct = await Product.findByIdAndUpdate(id, data);
