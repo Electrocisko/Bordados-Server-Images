@@ -66,7 +66,8 @@ export const createProduct = async (req, res) => {
       throw new Error("Falta datos");
     }
     let product = new Product(newProduct);
-    product.iat = dayjs();
+    product.iat = dayjs().format();
+
     let data = await product.save();
     res.status(200).json({
       status: "success",
@@ -130,7 +131,8 @@ export const modifiedProductById = async (req, res) => {
       fs.writeFileSync(pathImage, processImage);
       data.image = originalName;
     }
-    //data.iat = dayjs();  Dejo comentado esta linea porque no si es necesario
+    data.iat = dayjs().subtract(30,'day').format(); 
+
     //Modifica imagen si es que hay
     let modifiedProduct = await Product.findByIdAndUpdate(id, data);
   
