@@ -7,6 +7,7 @@ const productSchema = new Schema({
     descripcion:String,
     precio: Number,
     image: String,
+    public_id: String,
     iat: String,
     nostock: Boolean
 })

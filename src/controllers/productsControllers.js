@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import fs from "fs";
 import dayjs from "dayjs";
 import sharp from "sharp";
+import uploadFromBuffer from "../helpers/cloudinaryLoader.js"
 
 export const getProducts = async (req, res) => {
   try {
@@ -52,10 +53,14 @@ export const createProduct = async (req, res) => {
         throw new Error("Archivo adjunto no valido.");
       }
 
-      const processImage = await sharp(picture.buffer).resize(400, 400).toBuffer();// cambia el tamaño a 200 x 200 px
-      const pathImage = `src/public/images/${originalName}`;
-      newProduct.image = originalName;
-      fs.writeFileSync(pathImage, processImage);
+       const processImage = await sharp(picture.buffer).resize(400, 400).toBuffer();// cambia el tamaño a 200 x 200 px
+      // const pathImage = `src/public/images/${originalName}`;
+      // newProduct.image = originalName;
+      // fs.writeFileSync(pathImage, processImage);
+
+      const cloudinaryResult = await uploadFromBuffer(processImage);
+      newProduct.image = cloudinaryResult.secure_url;
+      newProduct.public_id= cloudinaryResult.public_id;
 
     } else {
       newProduct.image = "logo-envido.png";

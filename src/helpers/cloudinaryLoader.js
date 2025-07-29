@@ -4,7 +4,7 @@ import cloudinary from '../config/cloudinaryConfig.js';
 const uploadFromBuffer = (buffer) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: 'productos' },
+      { folder: 'bordados' },
       (error, result) => {
         if (result) resolve(result);
         else reject(error);
