@@ -14,10 +14,10 @@
   <body class="container">
     <h1>Lista de productos</h1>
 
-    <a href="/form"><button class="btn btn-success  mb-5"> Ingresar Producto Nuevo</button></a>
-    <a href="/"><button class="btn btn-success  mb-5"> Home</button></a>
-
-    
+    <a href="/form"
+      ><button class="btn btn-success mb-5">Ingresar Producto Nuevo</button></a
+    >
+    <a href="/"><button class="btn btn-success mb-5">Home</button></a>
 
     <table class="table">
       <thead>
@@ -27,9 +27,9 @@
           <th scope="col">Precio</th>
           <th scope="col">id</th>
           <th scope="col">Stock</th>
-          <th scope="col">Actualizado </th>
+          <th scope="col">Actualizado</th>
           <th scope="col">Acciones</th>
-     
+
           <th scope="col"></th>
         </tr>
       </thead>
@@ -45,19 +45,16 @@
           </td>
           <th><%= element.modelo %></th>
           <td>$<%= element.precio %></td>
-  
-          <td  style="font-size: 12px" scope="row"><%= element._id %></td>
-      
+
+          <td style="font-size: 12px" scope="row"><%= element._id %></td>
 
           <% if (element.nostock) { %>
-            <td  style="font-size: 12px; color: red;" scope="row">SIN STOCK</td>
-          <% } %> 
+          <td style="font-size: 12px; color: red" scope="row">SIN STOCK</td>
+          <% } %> <% if (!element.nostock) { %>
+          <td style="font-size: 12px" scope="row">-</td>
+          <% } %>
 
-          <% if (!element.nostock) { %>
-            <td  style="font-size: 12px" scope="row">-</td>
-          <% } %> 
-           
-          <td  style="font-size: 12px" scope="row"><%= element.iat %></td>
+          <td style="font-size: 12px" scope="row"><%= element.iat %></td>
           <td>
             <button
               onclick="updatedItem('<%= element._id %>')"
@@ -117,15 +114,27 @@
         })
           .then((response) => response.json())
           .then((data) => {
-            if (data.status === "error") {
-              Swal.fire(data.message);
-            }
             if (data.status === "success") {
-              Swal.fire("Borrado!");
+              Swal.fire({
+                icon: "success",
+                title: "Eliminado!",
+                showConfirmButton: false,
+                timer: 2000,
+              }).then(() => {
+                window.location.reload();
+              });
+            }
+            if (data.status === "error") {
+              Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: data.message,
+                showConfirmButton: true,
+                allowOutsideClick: false,
+              });
             }
           })
-          .catch((error) => console.log(error))
-          .finally(window.location.reload());
+          .catch((error) => console.log(error));
       };
       //funcion que me manda al formulario con el id en params
       function updatedItem(id) {

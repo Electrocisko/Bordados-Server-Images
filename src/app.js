@@ -34,5 +34,5 @@ app.use('/api', productsRouter );
 app.use('/api', loginRouter);
 
 app.listen(PORT, () => {
-    console.log('server listening :'+PORT);
+    console.log('http://localhost:'+PORT);
 })

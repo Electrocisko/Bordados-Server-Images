@@ -3,11 +3,12 @@ import mongoose from "mongoose";
 import fs from "fs";
 import dayjs from "dayjs";
 import sharp from "sharp";
-import uploadFromBuffer from "../helpers/cloudinaryLoader.js"
+import uploadFromBuffer from "../helpers/cloudinaryLoader.js";
+import cloudinary from "../config/cloudinaryConfig.js";
 
 export const getProducts = async (req, res) => {
   try {
-    const data = await Product.find().sort({nostock: 1, iat: -1}).lean()
+    const data = await Product.find().sort({ nostock: 1, iat: -1 }).lean();
     res.status(200).json({
       status: "success",
       category: "productos",
@@ -24,7 +25,9 @@ export const getProducts = async (req, res) => {
 export const getProductsCat = async (req, res) => {
   try {
     let param = req.params;
-    const data = await Product.find({ categoria: param.cat }).sort({onstock:1, iat: -1}).lean();
+    const data = await Product.find({ categoria: param.cat })
+      .sort({ onstock: 1, iat: -1 })
+      .lean();
     res.status(200).json({
       status: "success",
       category: param.cat,
@@ -44,7 +47,6 @@ export const createProduct = async (req, res) => {
     let newProduct = req.body;
     const { modelo, categoria, precio } = newProduct;
     if (req.file) {
-
       const picture = req.file;
       const originalName = req.file.originalname;
       const imageSplit = originalName.split(".");
@@ -53,20 +55,16 @@ export const createProduct = async (req, res) => {
         throw new Error("Archivo adjunto no valido.");
       }
 
-       const processImage = await sharp(picture.buffer).resize(400, 400).toBuffer();// cambia el tamaño a 200 x 200 px
-      // const pathImage = `src/public/images/${originalName}`;
-      // newProduct.image = originalName;
-      // fs.writeFileSync(pathImage, processImage);
-
+      const processImage = await sharp(picture.buffer)
+        .resize(400, 400)
+        .toBuffer(); // cambia el tamaño a 200 x 200 px
       const cloudinaryResult = await uploadFromBuffer(processImage);
       newProduct.image = cloudinaryResult.secure_url;
-      newProduct.public_id= cloudinaryResult.public_id;
-
+      newProduct.public_id = cloudinaryResult.public_id;
     } else {
       newProduct.image = "logo-envido.png";
     }
 
-    
     if (!modelo || categoria == "Seleccione categoría" || !precio) {
       throw new Error("Falta datos");
     }
@@ -90,21 +88,25 @@ export const deleteProductById = async (req, res) => {
   try {
     const id = req.params.id;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new Error("Id  no valido");
+    let exist = await Product.findById(id);
+
+    console.log(exist);
+    if (exist == null) throw new Error("No se encontro producto con ese Id");
+    if (exist.public_id) { await cloudinary.uploader.destroy(exist.public_id);} 
     let result = await Product.findByIdAndDelete(id);
-    // Borro el archivo
-    if (result.image !== "logo-envido.png") {
-      fs.unlinkSync(`src/public/images/${result.image}`);
-    }
-    if (result == null) throw new Error("No se encontro producto con ese Id");
+ 
+    console.log(result);
+
     res.status(200).json({
       status: "success",
       message: "Producto eliminado ",
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       status: "error",
-      message: "Error en borrar producto por su Id",
-      error: error.message,
+      message: error.message,
+      
     });
   }
 };
@@ -114,7 +116,7 @@ export const modifiedProductById = async (req, res) => {
     const id = req.params.id;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new Error("Id  no valido");
     let data = req.body;
-     //Modifica imagen si es que hay
+    //Modifica imagen si es que hay
     if (req.file) {
       const picture = req.file;
       const originalName = req.file.originalname;
@@ -130,17 +132,18 @@ export const modifiedProductById = async (req, res) => {
         fs.unlinkSync(`src/public/images/${oldData.image}`);
       }
 
-      const processImage = await sharp(picture.buffer).resize(400, 400).toBuffer();// cambia el tamaño a 200 x 200 px
+      const processImage = await sharp(picture.buffer)
+        .resize(400, 400)
+        .toBuffer(); // cambia el tamaño a 200 x 200 px
       const pathImage = `src/public/images/${originalName}`;
       fs.writeFileSync(pathImage, processImage);
       data.image = originalName;
-    } 
- 
+    }
+
     // data.iat = dayjs().format(); No se modifica fecha al actualizars
 
-   
     let modifiedProduct = await Product.findByIdAndUpdate(id, data);
-  
+
     res.status(200).json({
       status: "success",
       message: "Producto Modificado ",
@@ -150,7 +153,6 @@ export const modifiedProductById = async (req, res) => {
     res.status(500).json({
       status: "error",
       message: error.message,
-     
     });
   }
 };

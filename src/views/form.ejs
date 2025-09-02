@@ -15,7 +15,9 @@
     <main class="container">
       <h1>Bordados Envido</h1>
 
-      <a href="/admin"><button class="btn btn-secondary mb-3">Volver a Productos</button></a>
+      <a href="/admin"
+        ><button class="btn btn-secondary mb-3">Volver a Productos</button></a
+      >
 
       <form class="w-50" id="formulario">
         <div class="mb-3">
@@ -68,14 +70,19 @@
               name="precio"
             />
           </div>
-     
 
           <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" name="onstock" >
-            <label class="form-check-label" for="flexSwitchCheckChecked">Sin stock</label>
+            <input
+              class="form-check-input"
+              type="checkbox"
+              role="switch"
+              id="flexSwitchCheckChecked"
+              name="onstock"
+            />
+            <label class="form-check-label" for="flexSwitchCheckChecked"
+              >Sin stock</label
+            >
           </div>
-
-
         </div>
         <div class="mb-3">
           <label for="imagen" class="form-label">Imagen</label>
@@ -88,13 +95,8 @@
           />
         </div>
 
-      
-
-
         <button type="submit" class="btn btn-primary">Enviar</button>
       </form>
-
-      
     </main>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script
@@ -110,8 +112,10 @@
       form.addEventListener("submit", (e) => {
         e.preventDefault();
         let data = new FormData(form);
-        let checkStock = data.get("onstock")
-        checkStock ? data.append("nostock", true) : data.append("nostock", false)
+        let checkStock = data.get("onstock");
+        checkStock
+          ? data.append("nostock", true)
+          : data.append("nostock", false);
 
         fetch(route, {
           method: "POST",
@@ -122,11 +126,25 @@
         })
           .then((response) => response.json())
           .then((data) => {
+
+            console.log(data);
+
             if (data.status === "success") {
-              Swal.fire("Agregado!");
+              Swal.fire({
+                icon: "success",
+                title: "Agregado!",
+                showConfirmButton: false,
+                timer: 2000, 
+              });
               form.reset();
             } else {
-              Swal.fire(data.message);
+              Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: data.message,
+                showConfirmButton: true,
+                allowOutsideClick: false,
+              });
             }
           });
       });
