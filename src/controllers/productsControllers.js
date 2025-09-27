@@ -115,30 +115,12 @@ export const modifiedProductById = async (req, res) => {
     const id = req.params.id;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new Error("Id  no valido");
     let data = req.body;
+    let productData = await Product.findById(id);
+
+    if (productData == null) throw new Error("No se encontro producto con ese Id");
+ 
+
     //Modifica imagen si es que hay
-    // if (req.file) {
-    //   const picture = req.file;
-    //   const originalName = req.file.originalname;
-    //   const imageSplit = originalName.split(".");
-    //   const extension = imageSplit[1];
-    //   if (extension != "png" && extension != "jpg" && extension != "webp") {
-    //     throw new Error("Archivo adjunto no valido.");
-    //   }
-
-    //   const oldData = await Product.findById(id);
-    //   //Borro la imagen anterior
-    //   if (oldData.image !== "logo-envido.png") {
-    //     fs.unlinkSync(`src/public/images/${oldData.image}`);
-    //   }
-
-    //   const processImage = await sharp(picture.buffer)
-    //     .resize(400, 400)
-    //     .toBuffer(); // cambia el tamaño a 200 x 200 px
-    //   const pathImage = `src/public/images/${originalName}`;
-    //   fs.writeFileSync(pathImage, processImage);
-    //   data.image = originalName;
-    // }
-
         if (req.file) {
       const picture = req.file;
       const originalName = req.file.originalname;
@@ -151,12 +133,13 @@ export const modifiedProductById = async (req, res) => {
       const processImage = await sharp(picture.buffer)
         .resize(400, 400)
         .toBuffer(); // cambia el tamaño a 200 x 200 px
+           if (productData.public_id) {
+      await cloudinary.uploader.destroy(productData.public_id);
+    }
       const cloudinaryResult = await uploadFromBuffer(processImage);
       data.image = cloudinaryResult.secure_url;
       data.public_id = cloudinaryResult.public_id;
     }
-
-    // data.iat = dayjs().format(); No se modifica fecha al actualizars
 
     let modifiedProduct = await Product.findByIdAndUpdate(id, data);
 
