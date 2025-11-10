@@ -16,8 +16,8 @@ export default {
     SECRET_JWT: process.env.SECRET_JWT,
   },
   cloudinary: {
-    CLOUD_NAME: process.env.CLOUD_NAME,
-    CLOUD_API_KEY: process.env.CLOUD_API_KEY,
-    CLOUD_API_SECRET: process.env.CLOUD_API_SECRET,
+    CLOUD_NAME: process.env.BORDADOS_CLOUD_NAME,
+    CLOUD_API_KEY: process.env.BORDADOS_API_KEY,
+    CLOUD_API_SECRET: process.env.BORDADOS_API_SECRET,
   },
 };
