@@ -1,10 +1,32 @@
-import { Product } from "../models/productModel.js";
+import { Product, isValidMercadoLibreUrl } from "../models/productModel.js";
 import mongoose from "mongoose";
 import fs from "fs";
 import dayjs from "dayjs";
 import sharp from "sharp";
 import uploadFromBuffer from "../helpers/cloudinaryLoader.js";
 import cloudinary from "../config/cloudinaryConfig.js";
+
+const normalizeMercadoLibreUrl = (data) => {
+  if (!Object.hasOwn(data, "mercadoLibreUrl")) return false;
+
+  const value = typeof data.mercadoLibreUrl === "string"
+    ? data.mercadoLibreUrl.trim()
+    : data.mercadoLibreUrl;
+
+  if (!value) {
+    delete data.mercadoLibreUrl;
+    return true;
+  }
+
+  if (!isValidMercadoLibreUrl(value)) {
+    const error = new Error("La URL debe ser una publicación válida de Mercado Libre.");
+    error.status = 400;
+    throw error;
+  }
+
+  data.mercadoLibreUrl = value;
+  return false;
+};
 
 export const getProducts = async (req, res) => {
   try {
@@ -44,7 +66,8 @@ export const getProductsCat = async (req, res) => {
 
 export const createProduct = async (req, res) => {
   try {
-    let newProduct = req.body;
+    let newProduct = { ...req.body };
+    normalizeMercadoLibreUrl(newProduct);
     const { modelo, categoria, precio } = newProduct;
     if (req.file) {
       const picture = req.file;
@@ -77,7 +100,7 @@ export const createProduct = async (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({
+    res.status(error.status || 500).json({
       status: "error",
       message: error.message,
     });
@@ -114,7 +137,8 @@ export const modifiedProductById = async (req, res) => {
   try {
     const id = req.params.id;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new Error("Id  no valido");
-    let data = req.body;
+    let data = { ...req.body };
+    const removeMercadoLibreUrl = normalizeMercadoLibreUrl(data);
     let productData = await Product.findById(id);
 
     if (productData == null) throw new Error("No se encontro producto con ese Id");
@@ -141,7 +165,10 @@ export const modifiedProductById = async (req, res) => {
       data.public_id = cloudinaryResult.public_id;
     }
 
-    let modifiedProduct = await Product.findByIdAndUpdate(id, data);
+    const update = removeMercadoLibreUrl
+      ? { ...data, $unset: { mercadoLibreUrl: 1 } }
+      : data;
+    let modifiedProduct = await Product.findByIdAndUpdate(id, update, { runValidators: true });
 
     res.status(200).json({
       status: "success",
@@ -149,7 +176,7 @@ export const modifiedProductById = async (req, res) => {
       modifiedProduct,
     });
   } catch (error) {
-    res.status(500).json({
+    res.status(error.status || 500).json({
       status: "error",
       message: error.message,
     });
